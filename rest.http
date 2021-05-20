@@ -1,0 +1,3 @@
+#GET https://reqres.in/api/users
+
+OPTIONS http:restful.dev/wp-json/wp/v2/posts
