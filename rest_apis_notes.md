@@ -35,7 +35,7 @@
 -Good thing about this approach is that the API is tried and tested by the time it is made public, but things can get tricky when the needs of internal developers and external developers start to diverge. 
 3. The API for external developers first  
 -The external developer is always the priority. This means that there is no issue of managing confilcting interests of two groups.  
-
+<hr>
 <hr>
 
 ## CONSUMING APIs
@@ -56,6 +56,18 @@ print(response.json())
 
 ```
 
+### VSCode Rest Client
+-Extension that you install in vscode   
+-you then create a file containing your http request and then the rest client sends and processes the request and shows you the response   
+```
+rest.http:
+#GET https://reqres.in/api/users
+
+OPTIONS http:restful.dev/wp-json/wp/v2/posts
+
+```
+
+<hr>
 <hr>
 
 ## API PARADIGMS
@@ -72,132 +84,42 @@ print(response.json())
 -REST APIs enable the transfer of a representation of a resource's state.   
 -State is the current properties of a resource and/or the properties of a resource as a result of an operation performed on the resource.  
 -Rest APIs expose resource-based endpoints. HTTP verbs in request messages are used to specify the operation the client wants the server to perform on the resource. The operations can generally be encapulated in a model called CRUD - create, read, update, delete.  
--REST APIs are commonly referred to as RESTful web services because their implementation is based on the HTTP protocol.   
--REST APIs are simple to design, implement and maintain. They are easily understandable because they use standard HTTP methods for operating on resources.  
--Downsides of REST APIs is that when you access a resource you get all the information related to the resource, even data that you don't need, which results in a big payload. You also need multiple API calls to acess to get all the information you need from the API. They are also not optimised for performing operations that fall outside the CRUD model.  
 
--General rules that REST APIs follow:  
-1. REST APIs operate on a client-server relationship, where the API is the server. The client and server are completely separate and indepedent. of each other.   
-
-2. The API server needs to be stateless, meaning that each client request received must contain all the information required to process the request (including authentification credentials) since the server does not store any client information between requests.  
-
-3. The system architecture can be layered, with proxy servers and caches and gateways sitting between the client and the API server to improve performance, reliability, scalability and security.  
-
-4. The endpoints must be well-defined and consistent. The URL should contain:  
-a fully qualified domain name or a server IP and port number  
-4.1 the api world, to show that you are accessing a different part of the application. This can be done by prefixing the domain name with "api" or making the api world the second field  
+#### URLs AND RESOURCES
+-URL vs URI:  
+URI: any sequence of characters used to identify a resource  
+URL: URL identifies the resource but also tells us how to access it by providing an explicit method + location eg http://   
+All URLs are URIs but not all URIs are URLs.  
+-The URL of a resource can be written to reflect that a resource only exists within another resource using `:` before the name of the subresource. eg `POST /repos/:owner/:repo/issues` 
+-The endpoints must be well-defined and consistent. The URL should contain:  
+*a fully qualified domain name or a server IP and port number  
+*the api world, to show that you are accessing a different part of the application. This can be done by prefixing the domain name with "api" or making the api world the second field  
 eg https://wwww.api.myappname.com/
 or https://wwww.myappname.come/api/
-4.2 the version of the API being accessed  
-4.3 the resource being accessed. Note: Names of resources must be nouns, not verbs  
+*the version of the API being accessed  
+*the resource being accessed. Note: Names of resources must be nouns, not verbs  
 -Individual resources must have a unique identifier, usually its id in the database.  
 -URLs for collections end in a trailing slash  
 -Query parameters on a collection of entities can be added to the end of a URL for the collection, and start with a question mark symbol. Each query parameter is given as a key-value pair. Multiple query parameters are concatenated with the & symbol  
 -The request with query parameters may return 0 or an infinite number of entities. If no entity is found meeting the criteria its ok. The request with an entities ID must return exactly 1 entity; if no entity meeting that criteria is found it returns an error message   
 eg https://www.myapp.com/api/v1/users/ for all the users  
-https://www.myapp.com/api/v1/users/17 for user with id 17  
-https://www.myapp.com/api/users?startsWith=a
-
-5. Different HTTP verbs invoked on the same endpoint return different results. The HTTP verb specifies to the server what operation to perform on the resource.  
+https://www.myapp.com/api/v1/users/17 for user with id 17   
+https://www.myapp.com/api/users?startsWith=a   
+-Different HTTP verbs invoked on the same endpoint return different results. The HTTP verb specifies to the server what operation to perform on the resource.  
 CREATE: creating a new resource. POST method is used. Request message must contain a body. Target is a resource collection URL  
 READ: read-only access to the state of a resource. GET method is used. Request message usually doesn't have a body as the parameters are in the URL. Target can be collection or entity url.  
 UPDATE: replacing an existing resource. PUT method is used to completely replace a resource (ie overwrite), PATCH is used for partial replacement. Request message must contain a body. Target is an individual url.  
 DELETE: deleting an existing resource. DELETE method is used. Request message usually doesn't have a body as the parameters are in the URL. Target is an individual url.  
 -An API endpoint doesn't need to support all the HTTP methods. If a client tries to request the server to perform an operation an endpoint doesn't support the response will be a 403 (method not allowed) error.  
-
-6. Request and response messages follow standard HTTP protocol format.  
-Request message format:  
-method url http_version
-headers
-blank space
-body
-
-Response message format:  
-http_version status_code status_message  
-headers  
-blank space  
-body  
-
-```
-Example HTTP request to retrieve a charge from the Stripe API:
-
-GET /v1/charges/ch_CWyutlXs9pZyfD
-HOST api.stripe.com
-Authorization: Bearer YNoJ1Yq64iCBhzfL9HNO00fzVrsEjtVl
-----
-
-Example HTTP request to create a charge from the Stripe API:
-
-POST /v1/charges/ch_CWyutlXs9pZyfD
-HOST api.stripe.com
-Content-Type: application/x-www-form-urlencoded
-Authorization: Bearer YNoJ1Yq64iCBhzfL9HNO00fzVrsEjtVl
-
-amount=2000&currency=usd
-
-```
-
-7. REST doesnt specify the format to use to encode resources. However, the standard is to use JSON for web APIs. The `Content-Type` header in requests and responses is used to indicate the format in
-which a resource is encoded in the body.  
--It is considered good practice that the client is given a short list of URLs for top-level resources, and then finds subresources through discovery. The way this is achieved is that a JSON response of a resource will include full path URLs to other related resources.   
-
-Example: a blog post resource could have the following
-JSON representation:
-{
-"self_url": "http://www.example.com/api/posts/12345",
-"title": "Writing RESTful APIs in Python",
-"author_url": "http://www.example.com/api/users/2",
-"body": "... text of the article here ...",
-"comments_url": "http://www.example.com/api/posts/12345/comments"
-}
-
-
-8. The response message from the server includes standard HTTP status codes that give an indication about the status of the operation.  
-Status codes most used for APIs can broadly be divided into catagories:  
-2XX: Success 
-4XX: Client-side error  
-5XX: Server-side error  
-
-200 Okay                    Request executed successfully  
-201 Created                 The request has been fulfilled and a new resource created (the response might contain a "Location" header with a full url path to the resource)  
-202 Accepted                The request has been accepted and is being processed asynchronously (client doesnt need to wait for completion)  
-204 No content              The request was fulfilled and there is no data to return (usually for when updating a large entity)  
-400 Bad request             Client sent a request server can't understand  
-401 Unauthorized            Client cannot get access to a resource unless they get authorization.  
-403 Forbidden               Client went through the authorization process but they don't have sufficient rights to access the resource.  
-404 Page not found          A specific resource the client was tryint to access can not be found  
-500 Internal server error   Error occurred while trying to process the request. Error message should not give any detailed explaination about what went wrong for security reasons.  
-
-9. The URL of a resource can be written to reflect that a resource only exists within another resource using `:` before the name of the subresource. eg `POST /repos/:owner/:repo/issues`  
-
-### What is a REST API?
--Allow us to fully separate the presentation of content (data) from the content (data) itself   
-
--REST API: Representational state transfer application programming interface  
--Website: made up of several web pages individually downloaded from the web server. Each web page has an html document containing the content, css stylesheet defining how the content is styled and javascript file manipulating the content or styling or both.  
-When a user navigates from one page to another, the client sends a URL request to the server pointing at the desired resource.  The server sends the html document along with its accomponing css and javascript files.  The client then renders the new page from scratch, replacing the entire old content with the new content.  
-This approach is ok, but it is very resource intensive. Each new page requires a completed html document, which is written by a developer or CMS, before it is rendered by the client.  
--Web app: A web app runs in the browser and is populated with data from the server. There is a framework for how pages should be displayed. Each page is a view of the current state of the application.  
-When a user loads the site for the first time, all of the components are downloaded to the browser, including the html framework, stylesheet and javascript.  
-The application sends a URI (uniform resource identifier request) for a web resource representing the next state of the application to be transferred (ie the data required to build the next view).  
-When the client receives the response from the server, it uses it to modify, replace or delete existing data so that the webpage can reflect the current state of the application without rendering a whole new page.  
-The representational state of the application is transferred as a data object, not a completely new set of files.  
--This allows for the creation of different applications (mobile, web) that all consume the same backend API.  
--An API is a set of rules that define how two pieces of software will interact.    
-
--URL vs URI:  
-URI: any sequence of characters used to identify a resource  
-URL: URL identifies the resource but also tells us how to access it by providing an explicit method + location eg http://   
-All URLs are URIs but not all URIs are URLs.  
-
-### How REST relates to HTTP
-Not all REST APIs use the HTTP protocol but most do. A REST API can run on other protocol. REST and HTTP are not linked, they are just a convinient pair.  
+-Not all REST APIs use the HTTP protocol but most do. A REST API can run on other protocol. REST and HTTP are not linked, they are just a convinient pair.  
 A restful api is rest API that uses the HTTP protocol to grant access to web resources  
-HTTP: hypertext transfer protocol. Protocol web browser uses to transer information on the web  
+-REST APIs are simple to design, implement and maintain. They are easily understandable because they use standard HTTP methods for operating on resources.  
+-Downsides of REST APIs is that when you access a resource you get all the information related to the resource, even data that you don't need, which results in a big payload. You also need multiple API calls to acess to get all the information you need from the API. They are also not optimised for performing operations that fall outside the CRUD model.  
 
-### The 6 constraints of REST  
+
+#### The 6 constraints of REST  
 A rest API is an application programming interface that follows the following 6 architecture design constraints of REST:  
-client-server architecture, stateless, cacheable, layered system, code on demand  
+client-server architecture, stateless, cacheable, layered system, code on demand, uniform interface    
 
 1. Client-server architecture
 -ensures proper separation of concerns: the client manages the user interface (presentation) and the server manages the data  
@@ -215,7 +137,8 @@ client-server architecture, stateless, cacheable, layered system, code on demand
 -important for speed  
 
 4. Layered system
--the client shouldnt know or care whether it is connected directly to the server or an intermediary like a CDN or mirror.  
+-The system architecture can be layered, with proxy servers and caches and gateways sitting between the client and the API server to improve performance, reliability, scalability and security.    
+-the client shouldnt know or care whether it is connected directly to the server or an intermediary   
 -likewise the server doesnt care who it gets the request from. The server should not try to identify the client using headers in the request, because all requests will be routed through an intermediary (a load balancer)   
 -this helps with security and scalability  
 
@@ -250,18 +173,15 @@ eg the resource of interest could be stored as a table in the database; but the 
 -Clients do not know any resource URLs in advance except for the root URL of the API   
 -You should have links so that the client discovers new resources through links that it gets from resources that it already knows about.   
 -once a client has access to a rest service, it should be able to discover all available resources and methods through the hyperlinks provided in resource representations   
+-API discovery: figuring out what resources and methods are available  
+-A good REST API should have good documentation.  
+-Even without documentation using the GET and OPTIONS verbs you can navigate your way through the responses of a restful api to create a map of all of its resources and methods  
+-OPTIONS: returns every available method and resource for a given endpoint  
 
 eg request: "give me post #4 in json format"  
 response: "methods GET, PUT, DELETE. next post: #5, previous post: #3, category: 2"  
 
-
-### ACCESS
-Clients can be mobile, web app or IoT device: the rest api does not care. it just receives requests, processes them and returns the appropriate response.  
-REST APIs can be open, meaning anyone can consume the data that the API exposes.  
-Most APIs have strict rules regarding who can access the data and how many requests they can make in a set time period  
-
-
-### REQUESTS
+#### REQUESTS
 In REST, any information that can be named can be a resource: a document, an image, a collection of resources, etc  
 The resource URI has increased specificity that shows whether the client is interested in a collection or a singleton  
 REST APIs allow clients to perform actions on a resource by using the representation to capture the current or intended state of that resource and transferring that representation to the client.  
@@ -272,38 +192,63 @@ A request consists of a METHOD and a resource URI.
 The method is one of the standard http operators that define what action the client wants the server to perform (GET, PUT, POST, DELETE, PATCH).  
 The resource URI specifies the resource that the client is interested in and its location  
 When you submit a request you can include matadata in the request: Host, Content-Type, Authorization, Cache-Control  
+-Request message format:  
 ```
-GET https://resful.dev/post/5 HTTP/1.1
-Host: appsite.dev
-Content-Type: application/json
-Authorization: Basic dG9t0nBhc3N3b3Jk
-Cache-Control: no-cache
+method url http_version
+headers
+blank space
+body
+
+Response message format:  
+http_version status_code status_message  
+headers  
+blank space  
+body  
+
+```
+Example HTTP request to retrieve a charge from the Stripe API:
+
+```
+GET /v1/charges/ch_CWyutlXs9pZyfD
+HOST api.stripe.com
+Authorization: Bearer YNoJ1Yq64iCBhzfL9HNO00fzVrsEjtVl
 ```
 
-API discovery: figuring out what resources and methods are available  
-A good REST API should have good documentation.  
-Even without documentation using the GET and OPTIONS verbs you can navigate your way through the responses of a restful api to create a map of all of its resources and methods  
+Example HTTP request to create a charge from the Stripe API:
+```
+POST /v1/charges/ch_CWyutlXs9pZyfD
+HOST api.stripe.com
+Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer YNoJ1Yq64iCBhzfL9HNO00fzVrsEjtVl
 
-OPTIONS: returns every available method and resource for a given endpoint  
+amount=2000&currency=usd
 
-### RESPONSE 
+```
+
+#### RESPONSE 
+-The response message from the server includes standard HTTP status codes that give an indication about the status of the operation.  
+-The response you get from a rest API depends on the authorisation level you have  
 -Response always has a HEAD section, but that is consumed by the http client and not shown in the response data  
-To see the head you send a HEAD request to the API  
--Status: shows the sucess of the request  
+To see the head you send a HEAD request to the API 
+-Status codes most used for APIs can broadly be divided into catagories:  
 1XX information  
 2XX success  
 3XX redirect  
 4XX client error  
-5XX server error  
+5XX server error    
+```
+200 Okay                    Request executed successfully  
+201 Created                 The request has been fulfilled and a new resource created (the response might contain a "Location" header with a full url path to the resource)  
+202 Accepted                The request has been accepted and is being processed asynchronously (client doesnt need to wait for completion)  
+204 No content              The request was fulfilled and there is no data to return (usually for when updating a large entity)  
+400 Bad request             Client sent a request server can't understand  
+401 Unauthorized            Client cannot get access to a resource unless they get authorization.  
+403 Forbidden               Client went through the authorization process but they don't have sufficient rights to access the resource.  
+404 Page not found          A specific resource the client was tryint to access can not be found  
+500 Internal server error   Error occurred while trying to process the request. Error message should not give any detailed explaination about what went wrong for security reasons.  
+```
 
-The response you get from a rest API depends on the authorisation level you have  
-
-Authorization:  
-*Basic (very insecure)  
-*Json web tokens (JWT)  
-
-
-
+<hr>
 
 ### Remote Procedure Call (RPC)
 -RPC is all about actions. RPC APIs expose action-based endpoints.  
@@ -328,6 +273,7 @@ Authorization: Bearer xoxp-1650112-jgc2asDae
 channel=C01234
 
 ```
+<hr>
 
 ### GraphQL
 -GraphQL is a query language for the API.  
@@ -389,7 +335,7 @@ mutation AddReactionToIssue {
 }
 
 ```
-
+<hr>
 ### Choosing an API paradigm
 
 Do you need real-time feedback Y N
@@ -409,7 +355,7 @@ N: use rpc
 
 
 
-
+<hr>
 <hr>
 
 ## API SECURITY
@@ -417,11 +363,8 @@ N: use rpc
 -Security is a critical element of any web application, including APIs, because a security breach can result in theft/loss of critical data as well as loss in revenue.  
 -Things engineers do to secure web applications include input validation, using the Secure Sockets Layer (SSL) protocol, validating content types, maintaining audit logs, and protecting against cross-site request forgery (CSRF) and cross-site scripting (XSS).  
 -Security specific to APIs includes authenticating and authorizing users before allowing them to access web resources.  
--Authentification is the process of verifying the identity of a user. Web applications usually accomplish this by asking a user to log in with a username/email and password and check these against the credentials stored in the database to ensure that the request is authentic.  
--Authorization is the process of verifying that a user is permitted to do what they are trying to do.   
--Different ways of authenticating a user: session-based authentification, basic http authentification, JWT, OAuth2.0  
 
-## Authentification vs Authorization
+### Authentification vs Authorization
 Suppose you have an application (PicsArt) that allows ysers to upload images. The images can be uploaded directly from the user's device or from their social media account such as facebook or instagram.  
 In that case, PicsArt needs a way to be able to access a user's data on these other platforms.  
 To do that, it needs authentification and authorization!  
@@ -434,20 +377,48 @@ Authorization (AuthZ): the process of giving a third party application permissio
 
 Authorization depends on authentification, but they are not interchangeable  
 
-## Basic authorization  
-With basic authentification PicsArt would ask the user for their facebook login credentials.  
-PicsArt would then access their user's images on facebook on the user's behalf.  
+-Different ways of authenticating a user: session-based authentification, basic http authentification, JWT, OAuth2.0  
 
-This is terrible for several reasons:  
-1. If the user no longer wants to use PicsArt, they would have to change their password to really make sure all the access PicsArt had was revoked, which is massively inconvinient  
-2. PicsArt has full access to the user's facebook account, not just access to the images. This is terrible, because the user has no way of restricting the scope of access PicsArt has to their facebook data  
-3. Credentials are given to the 3rd party app, which is quite insecure  
+### Session-based authentification 
+-Session-based authentification, also known as cookie-based authentification, is a means of storing user credentials between requests to overcome an HTTP server's stateless nature.  
+-When a client first sends a server a request, the client provides user credentials. Once the server has authenticated the user, the server creates a session containing the user's credentials, and stores the session in a cookie that gets sent back to the client in the response. The client saves the cookie in its memory, and sends it to the server with every request. With each request the server can then authenticate the user using the info in the session, without the user having to re-enter their login details.  
+-This authentification method is simple and easy to implement.  
+-Downsides with this authentification method:  
+1. Security: hackers can steal cookies from the user's browser and hijack the session.  
+2. Performance: validating the session each time a request is made can be a costly operation if there is a lot of requests.  
+3. This authentification method doesn't work well with APIs. It is difficult for non-browser clients to implement session-based authentification.  
 
-## What is OAuth?
+### Basic HTTP Authentification 
+-The Basic HTTP Authentification method is the most basic technique for enforcing access control on the web.  
+-Every request that the client sends contains an `Authorization` header whose value is the word "Basic" followed by a space and a base64 encoded string of the username:password.  
+`Authorization: Basic dXNlcjpwYXNzd29yZA==`  
+-Although simple to implement, this method offers the least amount of security. Issues with them include:  
+1. The user's credentials are not encrypted, but stored in plain text and are easily decoded. This makes them vulnerable to a malicious hacker who could get ahold of them if they are exposed by a bug or some other means.  
+2. Once a user grants an application that uses basic authentification access to use their data, they can't revoke access to an individual application. They would need to revoke access to all applications by changing their password.  
+3. Applications get full access to user accounts, and users have no way to limit which resources the applications can access.  
+access to selected resources.
+-Flask has a library, flask-httpauth, that makes it easy to implement basic http authenfication.  
+
+### What is OAuth?
 Oauth2.0 is an authorization framework. It solves all the problems associated with basic authorization: it is more secure, the 3rd party app doesnt get the user's login credentials, the access the 3rd party app is granted is limited to a defined scope.    
 OpenID connect is an extension of OAuth2.0 used for authentification that specifies a standard way of returning user information via a userInfo endpoint  
+-Token-based authentification is the better alternative to basic http authentification, because the user's credentials are encrypted.  
+-The client application has to register with the API provider and be given a client id and client secret.  
+-The client first makes a request to the server to log the user in and get a signed token. The server authenticates the user and then generates a secure, signed token for the client and sends it in its response message.  
+-The client stores the token and every subsequent request that the client sends contains an `Authorization` header whose value is the word "Bearer" followed by a space and the token.  
+`Authorization: Bearer 8eb2c5b3a05a8c744c0b4e35f295e095`. When the user logs out of the application the token gets destroyed.  
+-There are two types of tokens: access tokens and refresh tokens. When a user is first authenticated, the client gets given both types of tokens.  
+-The client has to present the access token to gain access to a protected resource. Access tokens expire after a short time to ensure that even if a hacker gets ahold of it, they will only have access to the account for a short time.  
+-When an access token expires the client token presents the refresh token so that they can get a new access token. Reauthentication is not required to receive an access token if you present a refresh token. Refresh tokens also expire, but their lifespans are much longer than that of access tokens.  
+-Refresh tokens are quite secure because, to get an access token using a refresh token the client has to present the client id and client secret. Even if a hacker had to get ahold of the refresh tokens they would still need the client id and client secret to use them to get an access token.  
+-The benefits of using token-based authentification are:  
+1. It is more secure since user credentials are encrypted and tokens expire after some time.  
+2. Scalability: servers don't store any user information, so any server can be made available to handle a given client request.  
+3. Tokens can be generated anywhere. It is not necessary that the application validating the token be the same one that generated the token. Tokens can be generated on a different server or by a different company.  
+4. You can implement authorization with the access token, by specifying what resources it grants the client access to (ie defining scope). Clients will not be able to access unauthorised resources using that access token.  
+-The most common method of implementing token-based authentification is JWT. Other methods include Branca, pasito and macaroon.  
 
-## Terminology
+### Terminology
 Resource owner: the owner of the resource the 3rd party client app is trying to access (ie the facebook user)   
 
 Client: the 3rd party application that is tryint to access the protected resource on behalf of the user. It can be a mobile app, desktop app, single page web app, web app, etc (ie PicsArt)   
@@ -476,14 +447,14 @@ When defining scopes:
 -be consistent  
 -be granular   
 
-## OAuth endpoints
+### OAuth endpoints
 OAuth only specifies 2 endpoints:   
 `/authorize` used for anything user facing. Gets tje authorization grant and user consent. note: resource owner and client credentials grant types dont use this endpoint at all.   
 `/token` used to retrieve tokens   
 
 every other endpoint aside from these two is an extension!
 
-## Useful OAuth Extensions
+### Useful OAuth Extensions
 OpenID Connect: provides a way to authenticate users `/userinfo`   
 JSON Web Tokens (JWT): JWT are encoded, not encryped; it includes data such as issuer, issued at, subject, audience, expiration date. Data stored in a token is referred to as a 'claim'   
 Token revocation: cancelling a token before it expires `/revoke`   
@@ -494,58 +465,12 @@ Authorization server metadata discovery: allows us to query the authorization se
 
 Note: aside from `userinfo` endpoint from openID connect, endpoints from extensions can be named anything you want   
 
-## OpenID Connect 
+### OpenID Connect 
 OAuth + addition of ID tokens that contains the user's profile info + userinfo endpoint where you can get user data   
 
 When have you used openID connect?: sign in with google/linkedin/github etc: the client application gets access to your user data and can create a complete user profile from it without you having to provide that info all over again. You simply login to google/linkedin/github to authenticate yourself and authorize the client app, and then your data gets shared with the client app.   
 
-
-## OAuth Tokens
-
-
-
-
-## How OAuth authorization code grant type works
-
-
-## Session-based authentification 
--Session-based authentification, also known as cookie-based authentification, is a means of storing user credentials between requests to overcome an HTTP server's stateless nature.  
--When a client first sends a server a request, the client provides user credentials. Once the server has authenticated the user, the server creates a session containing the user's credentials, and stores the session in a cookie that gets sent back to the client in the response. The client saves the cookie in its memory, and sends it to the server with every request. With each request the server can then authenticate the user using the info in the session, without the user having to re-enter their login details.  
--This authentification method is simple and easy to implement.  
--Downsides with this authentification method:  
-1. Security: hackers can steal cookies from the user's browser and hijack the session.  
-2. Performance: validating the session each time a request is made can be a costly operation if there is a lot of requests.  
-3. This authentification method doesn't work well with APIs. It is difficult for non-browser clients to implement session-based authentification.  
-
-## Basic HTTP Authentification 
--The Basic HTTP Authentification method is the most basic technique for enforcing access control on the web.  
--Every request that the client sends contains an `Authorization` header whose value is the word "Basic" followed by a space and a base64 encoded string of the username:password.  
-`Authorization: Basic dXNlcjpwYXNzd29yZA==`  
--Although simple to implement, this method offers the least amount of security. Issues with them include:  
-1. The user's credentials are not encrypted, but stored in plain text and are easily decoded. This makes them vulnerable to a malicious hacker who could get ahold of them if they are exposed by a bug or some other means.  
-2. Once a user grants an application that uses basic authentification access to use their data, they can't revoke access to an individual application. They would need to revoke access to all applications by changing their password.  
-3. Applications get full access to user accounts, and users have no way to limit which resources the applications can access.  
-access to selected resources.
--Flask has a library, flask-httpauth, that makes it easy to implement basic http authenfication.  
-
-## Token-based Authentification 
--Token-based authentification is the better alternative to basic http authentification, because the user's credentials are encrypted.  
--The client application has to register with the API provider and be given a client id and client secret.  
--The client first makes a request to the server to log the user in and get a signed token. The server authenticates the user and then generates a secure, signed token for the client and sends it in its response message.  
--The client stores the token and every subsequent request that the client sends contains an `Authorization` header whose value is the word "Bearer" followed by a space and the token.  
-`Authorization: Bearer 8eb2c5b3a05a8c744c0b4e35f295e095`. When the user logs out of the application the token gets destroyed.  
--There are two types of tokens: access tokens and refresh tokens. When a user is first authenticated, the client gets given both types of tokens.  
--The client has to present the access token to gain access to a protected resource. Access tokens expire after a short time to ensure that even if a hacker gets ahold of it, they will only have access to the account for a short time.  
--When an access token expires the client token presents the refresh token so that they can get a new access token. Reauthentication is not required to receive an access token if you present a refresh token. Refresh tokens also expire, but their lifespans are much longer than that of access tokens.  
--Refresh tokens are quite secure because, to get an access token using a refresh token the client has to present the client id and client secret. Even if a hacker had to get ahold of the refresh tokens they would still need the client id and client secret to use them to get an access token.  
--The benefits of using token-based authentification are:  
-1. It is more secure since user credentials are encrypted and tokens expire after some time.  
-2. Scalability: servers don't store any user information, so any server can be made available to handle a given client request.  
-3. Tokens can be generated anywhere. It is not necessary that the application validating the token be the same one that generated the token. Tokens can be generated on a different server or by a different company.  
-4. You can implement authorization with the access token, by specifying what resources it grants the client access to (ie defining scope). Clients will not be able to access unauthorised resources using that access token.  
--The most common method of implementing token-based authentification is JWT. Other methods include Branca, pasito and macaroon.  
-
-## Json Web Tokens (JWT)
+### Json Web Tokens (JWT)
 -A json web token is a standard that defines a secure and compact way of transmitting user credentials between a client and a server in the form of a json object.  
 -The json web token can be signed (base64 encoded), encrypted or both. If it is neither unsigned nor encrypted then it is an ensecure JWT. Signing tokens ensures that its integrity is kept intact (other parties can view its content but cant alter it). Encrypting a token ensures that its security is maintained (other parties cant see the content but they can modify it). It's a good idea to sign and encrypt a token so that its contents cant be seen or modified.  
 -A JWT is 3 strings separated by a dot: `encoded_header.encoded_payload.signature`  
@@ -598,13 +523,13 @@ Together: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFt
 
 
 
+### How OAuth authorization code grant type works
 
 
 <hr>
+<hr>
 
 ## API PERFORMANCE CONSIDERATIONS
-
-
 
 Asynchronous operations  
 Caching  
@@ -614,31 +539,5 @@ load balancing
 monitoring and logging  
 
 <hr>
-
-
-
-
 <hr>
 
-## DESIGNG REST APIs
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<hr>
-
-## DEVELOPING REST APIs
